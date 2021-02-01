@@ -113,7 +113,7 @@ In order to rerun the experiments, you have to add the runs as txt files under *
         - Check jupyter notebook *notebooks/gzforce_tolerance_models.ipynb* for usage example.
 
     #### dnn.py
-    - dnn.py: this python file has the main class `GenericModel()`. And the two models `SequentialModel(GenericModel)` and `Lstm(GenericModel)`:
+    - dnn.py: this python file has the main class `GenericModel()` and three models `SequentialModel(GenericModel)`, `Lstm(GenericModel)` and a `Baseline(DummyRegressor)` Model:
         - `SequentialModel(GenericModel)` implements a simple 3 layer sequential model - usage example:
             ```python
             # Initializing the Sequential Model
@@ -136,6 +136,7 @@ In order to rerun the experiments, you have to add the runs as txt files under *
 
         - `Lstm(GenericModel)` implements a Biderectional LSTM model - It has a function to tune the learning rate in addition to train/evaluate - usage example:
             ```python
+                # Initializing the LSTM Model
                 lstm_model = ansim.dnn.Lstm(dataset_train, dataset_test,
                             input_shape_instances= data_preprocessor.windowDataset.window_size,
                             input_shape_features = len(data_preprocessor.x_columns))
@@ -151,44 +152,18 @@ In order to rerun the experiments, you have to add the runs as txt files under *
                 # evaluate
                 lstm_model.evaluate()
             ```
+        - `Baseline(DummyRegressor)` implements a simple dummy regessor that always predicts the mean or the median of the training set - usage example:
+            ```python
+                # Initializing the baseline Model
+                baseline = ansim.dnn.Baseline(X_training, y_training, X_test, y_test)
+
+                # "train" and print evaluation
+                print(baseline.dummy_train_test(strategy = "mean")) # strategy can be:
+                                                                    # “mean”: always predicts the mean of the training set
+                                                                    # “median”: always predicts the median of the training set
+            ```
+
         - Check jupyter notebook *notebooks/gzforce_tolerance_models.ipynb* for usage example.
 
     #### utils.py
     - utils.py: contains generic helper functions.
-
-<a name="hpc_cluster"/>
-
-## Running Notebooks on the HPC-Cluster
-
-### Setup: miniconda, tensorflow, pandas, scikit and jupyter
-Sidenote: You may need to initialize your shell while setting up conda, follow the on screen instructions and it should work.
-
-* SSH onto the cluster with ```ssh <USER_NAME>@fe-store01.sc.bs.dlr.de```
-* Load the Miniconda2 Module with ```module load miniconda2/miniconda2-4.7.12.1/miniconda2-4.7.12.1-gcc-10.2.0-tpknuns```
-* Create a conda environment ```conda create --name <YOUR_ENV_NAME> python=3.8.5``` (this creates a conda env that uses python 3.8.5)
-* Activate it ```conda activate <YOUR_ENV_NAME>```
-* Install tensorflow, pandas and scikit ```conda install tensorflow-gpu``` ```conda install pandas``` ```conda install -c conda-forge scikit-learn``` ```conda install jupyter```
-#### Starting the jupyter notebook server and accessing it from your browser
-* After the initial setup, you don't need to load the miniconda module, you can type ```conda activate <YOUR_ENV_NAME>``` to activate your environment
-* On the Cluster: Start the jupyter notebook server with ```srun -p gpu -t <TIME_OUT> jupyter notebook --no-browser --port=8008```
-(We should write down who is using which port, to avoid mix-ups. Later we could also discuss running just one "group" notebook server.)
-* On your local machine: Enable port forwarding with ```ssh -L localhost:8888:localhost:8008 <USER_NAME>@be-gpu01.sc.bs.dlr.de -v -v``` Here you may have to adapt the second port. In general, both ports are customizable.
-
-You should be able to access the notebook via your browser on ```http://localhost:8888/```. (You may need a token to access it, the token should be listed in the shell running the notebook).
-You have to specify a timeout when using srun, otherwise SLURM will kill the process after (I think) half an hour.
-One proposed workflow (for training a network) could be: Run the notebook without a timeout, start the training, check how long one epoch takes, calculate the time needed for training, set the timeout accordingly (+ buffer).
-
-!!! You should also use a screen session or SBATCH to avoid srun from terminating when your ssh connection times out (At least for the jupyter server) !!!
-
-When using screen: Keep in mind to kill/quit the screen sessions afterwards, to avoid unused screens running in the background.
-Screen usage example:  
-```ssh <USER_NAME>@fe-store01.sc.bs.dlr.de```  
-```screen```  
-```conda activate <YOUR_ENV_NAME>```  
-```srun -p gpu -t <TIME_OUT> jupyter notebook --no-browser --port=8008```  
-Afterwards you can press ctrl+a and d to detach from the screen, and ```screen -r``` to reattach.
-
-### GIT Setup and locating the dataset
-If this is your first time on the cluster, you won't have a $HOME folder. (I got mine approx. 1 hour after my first login)
-Afterwards clone the git into your home. The Dataset is currently on ```/scratch/kone_ka/ansim/data/```. You may have to adjust the path in your code accordingly. (You should have access to it, if not please tell me)
-
