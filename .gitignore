@@ -1,0 +1,11 @@
+data/Export_SAHC_Testfiles/*
+data/Export_SAHC_Testfiles.zip
+ignore
+.ipynb_checkpoints
+data/sahc_csv
+data/small_files
+data/g_force_z_min_*
+data/g_force_z_steps*
+*/.idea
+.idea
+*__pycache__
