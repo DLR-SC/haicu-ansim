@@ -6,8 +6,6 @@
 
 [Code Documentation](#code)
 
-[Running Notebooks on the HPC-Cluster](#hpc_cluster)
-
 # AI Enabled Autonomous Nervous System Intelligent Monitoring (ANSIM)
 
 <a name="goal"/>
